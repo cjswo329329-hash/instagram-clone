@@ -1,0 +1,54 @@
+:root {
+  /* 라이트 모드 (Default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-elevated: #ffffff;
+  --text-primary: #262626;
+  --text-secondary: #737373;
+  --text-muted: #8e8e8e;
+  --border-color: #dbdbdb;
+  --border-subtle: #efefef;
+  --ig-primary-button: #0095f6;
+  --ig-primary-button-hover: #1877f2;
+  --ig-danger: #ed4956;
+  --ig-link: #00376b;
+  --overlay-backdrop: rgba(0, 0, 0, 0.65);
+  --badge-bg: #e4e6eb;
+
+  /* 시그니처 그라디언트 (스토리 링) */
+  --story-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  --story-gray: #dbdbdb;
+
+  /* 타이포그래피 */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-brand: 'Grand Hotel', cursive;
+
+  /* 반응형 분기점 및 규격 */
+  --sidebar-width-expanded: 244px;
+  --sidebar-width-collapsed: 72px;
+  --feed-max-width: 630px;
+  --right-sidebar-width: 320px;
+  --nav-height-mobile: 50px;
+  --bottom-bar-height-mobile: 50px;
+
+  /* 트랜지션 */
+  --transition-fast: 0.15s ease-in-out;
+  --transition-normal: 0.25s ease-in-out;
+}
+
+[data-theme='dark'] {
+  --bg-primary: #000000;
+  --bg-secondary: #121212;
+  --bg-elevated: #262626;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a8a8a8;
+  --text-muted: #737373;
+  --border-color: #262626;
+  --border-subtle: #1f1f1f;
+  --ig-primary-button: #0095f6;
+  --ig-primary-button-hover: #1877f2;
+  --ig-link: #e0f1ff;
+  --story-gray: #363636;
+  --overlay-backdrop: rgba(0, 0, 0, 0.85);
+  --badge-bg: #363636;
+}

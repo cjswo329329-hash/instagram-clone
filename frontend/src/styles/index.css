@@ -1,0 +1,243 @@
+@import './variables.css';
+@import './reels.css';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  outline: none;
+}
+
+input, textarea {
+  font-family: inherit;
+  color: inherit;
+  outline: none;
+  border: none;
+  background: transparent;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 커스텀 스크롤바 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* 스크롤바 숨기기 유틸리티 */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 인스타그램 브랜드 폰트 */
+.brand-logo {
+  font-family: var(--font-brand);
+  font-size: 2.2rem;
+  letter-spacing: -0.5px;
+  user-select: none;
+  line-height: 1;
+}
+
+/* 더블 탭 팝업 하트 애니메이션 (보고서 정밀 곡선) */
+@keyframes heartBurst {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, -50%) scale(1.25);
+    opacity: 0.95;
+  }
+  30% {
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(-50%, -50%) scale(1.0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+}
+
+.heart-burst-animate {
+  animation: heartBurst 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* 탭 시 재생/일시정지 플래시 뱃지 애니메이션 */
+@keyframes playBadgeFlash {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1.15);
+    opacity: 0.95;
+  }
+  60% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+.play-badge-animate {
+  animation: playBadgeFlash 0.55s ease-out forwards;
+}
+
+/* 좋아요 버튼 클릭 바운스 애니메이션 */
+@keyframes likeBounce {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.35); }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+.like-bounce {
+  animation: likeBounce 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 모달 페이드인 애니메이션 */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-enter {
+  animation: modalFadeIn 0.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+/* 스토리 링 그라디언트 테두리 */
+.story-ring-gradient {
+  background: var(--story-gradient);
+  padding: 2px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.story-ring-viewed {
+  background: var(--story-gray);
+  padding: 2px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.story-ring-inner {
+  background-color: var(--bg-primary);
+  padding: 2px;
+  border-radius: 50%;
+  display: flex;
+}
+
+/* 릴스 스냅 스크롤 강제 락 */
+.reel-snap-container {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.reel-snap-item {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* 릴스 오디오 텍스트 마퀴 애니메이션 */
+@keyframes reelMarquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: reelMarquee 12s linear infinite;
+}
+
+/* 릴스 오디오 바이닐 회전 애니메이션 */
+@keyframes spinDisc {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinDisc 6s linear infinite;
+}
+
+/* 스크롤바 숨기기 유틸리티 */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+

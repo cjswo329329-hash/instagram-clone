@@ -1,0 +1,144 @@
+import os
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from app.config import settings
+from app.database import engine, Base, SessionLocal
+import app.models  # load all models for metadata
+from app.models.user import User
+from app.core.security import get_password_hash
+from app.routers import (
+    auth_router,
+    users_router,
+    posts_router,
+    comments_router,
+    reels_router,
+    explore_router,
+    direct_router,
+    stories_router,
+    bookmarks_router,
+    follows_router,
+    notifications_router,
+    uploads_router,
+    admin_router,
+)
+
+# 데이터베이스 테이블 자동 생성
+Base.metadata.create_all(bind=engine)
+
+def init_db_and_admin():
+    """
+    데이터베이스 스키마 마이그레이션 및 기본 관리자 계정 초기화
+    아이디: admin / 비밀번호: pass123
+    """
+    with engine.connect() as conn:
+        from sqlalchemy import text
+        # users 테이블에 is_admin 컬럼이 없으면 자동 추가
+        cursor = conn.execute(text("PRAGMA table_info(users)"))
+        columns = [row[1] for row in cursor.fetchall()]
+        if "is_admin" not in columns:
+            conn.execute(text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN NOT NULL DEFAULT 0"))
+            conn.commit()
+
+    db = SessionLocal()
+    try:
+        admin_user = db.query(User).filter(User.username == "admin").first()
+        if not admin_user:
+            admin_user = User(
+                username="admin",
+                email="admin@instagram.local",
+                hashed_password=get_password_hash("pass123"),
+                full_name="시스템 관리자",
+                bio="Instagram 시스템 최고 관리자 계정",
+                profile_image_url="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+                is_private=False,
+                is_verified=True,
+                is_admin=True,
+            )
+            db.add(admin_user)
+            db.commit()
+            print("[INFO] 관리자 계정(admin)이 새로 생성되었습니다.")
+        else:
+            # 관리자 권한 및 요청된 비밀번호 동기화
+            admin_user.is_admin = True
+            admin_user.hashed_password = get_password_hash("pass123")
+            db.commit()
+            print("[INFO] 관리자 계정(admin) 정보가 업데이트되었습니다.")
+    except Exception as e:
+        print(f"[WARN] 관리자 계정 초기화 중 예외: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+init_db_and_admin()
+
+# 미디어 업로드 폴더 생성
+for category in ["posts", "reels", "profiles", "stories", "direct"]:
+    os.makedirs(os.path.join(settings.UPLOAD_DIR, category), exist_ok=True)
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    description="Instagram Clone Backend REST API with FastAPI and SQLite (Complete)",
+    version="1.0.0",
+)
+
+# CORS 설정 (개발 환경 프론트엔드 연동)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 정적 업로드 파일 서빙
+app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+
+# 정적 비디오 파일 서빙 (릴스 비디오 로컬 호스팅 지원)
+videos_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "public", "videos"))
+if os.path.exists(videos_dir):
+    app.mount("/videos", StaticFiles(directory=videos_dir), name="videos")
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    from fastapi.encoders import jsonable_encoder
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "status_code": 422,
+            "error": "UNPROCESSABLE_ENTITY",
+            "message": "요청 데이터의 유효성 검사에 실패했습니다.",
+            "detail": jsonable_encoder(exc.errors()),
+        },
+    )
+
+# API 라우터 등록 (전체 12개 라우터)
+app.include_router(auth_router, prefix="/api")
+app.include_router(users_router, prefix="/api")
+app.include_router(posts_router, prefix="/api")
+app.include_router(comments_router, prefix="/api")
+app.include_router(reels_router, prefix="/api")
+app.include_router(explore_router, prefix="/api")
+app.include_router(direct_router, prefix="/api")
+app.include_router(stories_router, prefix="/api")
+app.include_router(bookmarks_router, prefix="/api")
+app.include_router(follows_router, prefix="/api")
+app.include_router(notifications_router, prefix="/api")
+app.include_router(uploads_router, prefix="/api")
+app.include_router(admin_router, prefix="/api")
+
+@app.get("/")
+def root():
+    return {
+        "project": settings.PROJECT_NAME,
+        "status": "online",
+        "docs": "/docs",
+        "version": "1.0.0"
+    }
+
+@app.get("/health")
+@app.get("/api/health")
+def health_check():
+    return {"status": "healthy"}
