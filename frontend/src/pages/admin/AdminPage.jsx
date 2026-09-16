@@ -10,7 +10,10 @@ import {
   RefreshCw,
   Sun,
   Moon,
-  Film
+  Film,
+  AlertOctagon,
+  FileCheck2,
+  Activity
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -21,6 +24,8 @@ import { AdminStatsDashboard } from './AdminStatsDashboard';
 import { AdminUserManagement } from './AdminUserManagement';
 import { AdminPostManagement } from './AdminPostManagement';
 import { AdminReelManagement } from './AdminReelManagement';
+import { AdminReportManagement } from './AdminReportManagement';
+import { AdminAuditLogViewer } from './AdminAuditLogViewer';
 
 export const AdminPage = () => {
   const { user, logout } = useAuth();
@@ -28,7 +33,7 @@ export const AdminPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // 현재 활성화된 탭 (dashboard | users | posts)
+  // 현재 활성화된 탭 (dashboard | users | posts | reels | reports | logs)
   const currentTab = searchParams.get('tab') || 'dashboard';
 
   const [stats, setStats] = useState(null);
@@ -59,6 +64,8 @@ export const AdminPage = () => {
     logout();
     navigate('/login');
   };
+
+  const pendingReportsCount = stats?.summary?.pending_reports || 0;
 
   return (
     <div
@@ -127,26 +134,26 @@ export const AdminPage = () => {
           </div>
 
           {/* 탭 네비게이션 */}
-          <nav style={{ display: 'flex', gap: '4px', marginLeft: '24px' }} className="admin-nav-tabs">
+          <nav style={{ display: 'flex', gap: '4px', marginLeft: '20px' }} className="admin-nav-tabs">
             <button
               onClick={() => handleTabChange('dashboard')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                padding: '8px 16px',
+                padding: '8px 14px',
                 borderRadius: '8px',
                 border: 'none',
                 backgroundColor: currentTab === 'dashboard' ? 'var(--border-subtle)' : 'transparent',
                 color: currentTab === 'dashboard' ? 'var(--ig-primary-button)' : 'var(--text-secondary)',
                 fontWeight: currentTab === 'dashboard' ? 700 : 500,
-                fontSize: '14px',
+                fontSize: '13px',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
             >
-              <BarChart3 size={18} />
-              <span>통계 대시보드</span>
+              <BarChart3 size={17} />
+              <span>통계 & 헬스</span>
             </button>
 
             <button
@@ -155,18 +162,18 @@ export const AdminPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                padding: '8px 16px',
+                padding: '8px 14px',
                 borderRadius: '8px',
                 border: 'none',
                 backgroundColor: currentTab === 'users' ? 'var(--border-subtle)' : 'transparent',
                 color: currentTab === 'users' ? 'var(--ig-primary-button)' : 'var(--text-secondary)',
                 fontWeight: currentTab === 'users' ? 700 : 500,
-                fontSize: '14px',
+                fontSize: '13px',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
             >
-              <Users size={18} />
+              <Users size={17} />
               <span>회원 관리</span>
             </button>
 
@@ -176,18 +183,18 @@ export const AdminPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                padding: '8px 16px',
+                padding: '8px 14px',
                 borderRadius: '8px',
                 border: 'none',
                 backgroundColor: currentTab === 'posts' ? 'var(--border-subtle)' : 'transparent',
                 color: currentTab === 'posts' ? 'var(--ig-primary-button)' : 'var(--text-secondary)',
                 fontWeight: currentTab === 'posts' ? 700 : 500,
-                fontSize: '14px',
+                fontSize: '13px',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
             >
-              <FileText size={18} />
+              <FileText size={17} />
               <span>게시물 관리</span>
             </button>
 
@@ -197,29 +204,104 @@ export const AdminPage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                padding: '8px 16px',
+                padding: '8px 14px',
                 borderRadius: '8px',
                 border: 'none',
                 backgroundColor: currentTab === 'reels' ? 'var(--border-subtle)' : 'transparent',
                 color: currentTab === 'reels' ? 'var(--ig-primary-button)' : 'var(--text-secondary)',
                 fontWeight: currentTab === 'reels' ? 700 : 500,
-                fontSize: '14px',
+                fontSize: '13px',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
             >
-              <Film size={18} />
+              <Film size={17} />
               <span>릴스 관리</span>
+            </button>
+
+            <button
+              onClick={() => handleTabChange('reports')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor: currentTab === 'reports' ? 'var(--border-subtle)' : 'transparent',
+                color: currentTab === 'reports' ? 'var(--ig-primary-button)' : 'var(--text-secondary)',
+                fontWeight: currentTab === 'reports' ? 700 : 500,
+                fontSize: '13px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                position: 'relative',
+              }}
+            >
+              <AlertOctagon size={17} color={pendingReportsCount > 0 ? '#ef4444' : undefined} />
+              <span>신고 심사</span>
+              {pendingReportsCount > 0 && (
+                <span
+                  style={{
+                    backgroundColor: '#ef4444',
+                    color: '#ffffff',
+                    borderRadius: '10px',
+                    padding: '1px 6px',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                  }}
+                >
+                  {pendingReportsCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => handleTabChange('logs')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor: currentTab === 'logs' ? 'var(--border-subtle)' : 'transparent',
+                color: currentTab === 'logs' ? 'var(--ig-primary-button)' : 'var(--text-secondary)',
+                fontWeight: currentTab === 'logs' ? 700 : 500,
+                fontSize: '13px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <FileCheck2 size={17} />
+              <span>감사 로그</span>
             </button>
           </nav>
         </div>
 
-        {/* 우측 관리자 정보 및 액션 버튼들 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {/* 우측 시스템 상태 및 관리자 정보 버튼들 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* 시스템 정상 상태 뱃지 */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '5px 10px',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderRadius: '20px',
+              color: '#10b981',
+              fontSize: '12px',
+              fontWeight: 600,
+            }}
+          >
+            <Activity size={13} />
+            <span className="hide-mobile">DB & 시스템 정상</span>
+          </div>
+
           {/* 새로고침 버튼 */}
           <button
             onClick={fetchStats}
-            title="통계 새로고침"
+            title="데이터 새로고침"
             style={{
               background: 'none',
               border: 'none',
@@ -233,7 +315,7 @@ export const AdminPage = () => {
             }}
             className="hover-bg"
           >
-            <RefreshCw size={18} className={statsLoading ? 'spin-icon' : ''} />
+            <RefreshCw size={17} className={statsLoading ? 'spin-icon' : ''} />
           </button>
 
           {/* 테마 토글 버튼 */}
@@ -253,29 +335,29 @@ export const AdminPage = () => {
             }}
             className="hover-bg"
           >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            {isDark ? <Sun size={17} /> : <Moon size={17} />}
           </button>
 
-          {/* 인스타그램 메인으로 이동 */}
+          {/* 인스타그램 앱으로 복귀 */}
           <button
             onClick={() => navigate('/')}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '8px 14px',
+              padding: '7px 12px',
               borderRadius: '8px',
               border: '1px solid var(--border-color)',
               backgroundColor: 'var(--bg-primary)',
               color: 'var(--text-primary)',
-              fontSize: '13px',
+              fontSize: '12px',
               fontWeight: 600,
               cursor: 'pointer',
             }}
             className="hover-bg"
           >
-            <ArrowLeft size={16} />
-            <span>앱으로 복귀</span>
+            <ArrowLeft size={14} />
+            <span className="hide-mobile">앱 복귀</span>
           </button>
 
           {/* 관리자 프로필 */}
@@ -291,7 +373,7 @@ export const AdminPage = () => {
             }}
           >
             <Avatar src={user?.profile_image_url} size="xs" />
-            <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
               {user?.username}
             </span>
           </div>
@@ -313,7 +395,7 @@ export const AdminPage = () => {
             }}
             className="hover-bg"
           >
-            <LogOut size={18} />
+            <LogOut size={17} />
           </button>
         </div>
       </header>
@@ -322,7 +404,7 @@ export const AdminPage = () => {
       <main
         style={{
           flex: 1,
-          maxWidth: '1240px',
+          maxWidth: '1260px',
           width: '100%',
           margin: '0 auto',
           padding: '24px 20px 60px 20px',
@@ -342,6 +424,10 @@ export const AdminPage = () => {
         {currentTab === 'posts' && <AdminPostManagement onDataChange={fetchStats} />}
 
         {currentTab === 'reels' && <AdminReelManagement onDataChange={fetchStats} />}
+
+        {currentTab === 'reports' && <AdminReportManagement onDataChange={fetchStats} />}
+
+        {currentTab === 'logs' && <AdminAuditLogViewer />}
       </main>
 
       <style>{`
@@ -355,12 +441,15 @@ export const AdminPage = () => {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
           .admin-nav-tabs {
             margin-left: 8px !important;
           }
           .admin-nav-tabs button span {
             display: none;
+          }
+          .hide-mobile {
+            display: none !important;
           }
         }
       `}</style>

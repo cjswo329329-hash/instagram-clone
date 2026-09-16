@@ -167,5 +167,38 @@ npm run dev
 
 ---
 
+## 🚀 자동 배포 및 CI/CD (Automated Deployment)
+
+본 프로젝트는 프로덕션 상용 환경을 위한 다중 자동 배포 파이프라인을 지원합니다.
+
+### 1. Docker Compose 멀티 컨테이너 원클릭 배포
+프론트엔드(Nginx 리버스 프록시)와 백엔드(FastAPI)를 완전 격리된 컨테이너 환경으로 자동 배포합니다:
+```bash
+# 컨테이너 빌드 및 백그라운드 무중단 실행
+docker compose up -d --build
+```
+- 웹 서비스 접속: `http://localhost`
+- 백엔드 Swagger: `http://localhost:8000/docs`
+
+### 2. 자동 배포 스크립트 실행
+- **Linux / Cloud 서버**:
+  ```bash
+  chmod +x deploy.sh
+  ./deploy.sh
+  ```
+- **Windows 환경**:
+  ```cmd
+  deploy.bat
+  ```
+
+### 3. GitHub Actions CI/CD 파이프라인 (`.github/workflows/deploy.yml`)
+`main` 브랜치에 코드가 푸시되면 자동으로 다음 과정이 트리거됩니다:
+1. **보안 및 상용화 종합 검증** (`test_admin_commercial_readiness.py`)
+2. **레드팀 모의 침투 침해 공격 테스트** (`red_team_attack_suite.py`)
+3. **프론트엔드 프로덕션 최적화 빌드 검증** (`npm run build`)
+4. **프로덕션 자동 배포 준비 완료 알림**
+
+---
+
 ## 📄 라이선스 (License)
 This project is open-sourced under the MIT License.

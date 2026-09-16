@@ -23,6 +23,7 @@ from app.routers import (
     notifications_router,
     uploads_router,
     admin_router,
+    reports_router,
 )
 
 # 데이터베이스 테이블 자동 생성
@@ -40,7 +41,13 @@ def init_db_and_admin():
         columns = [row[1] for row in cursor.fetchall()]
         if "is_admin" not in columns:
             conn.execute(text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN NOT NULL DEFAULT 0"))
-            conn.commit()
+        if "is_banned" not in columns:
+            conn.execute(text("ALTER TABLE users ADD COLUMN is_banned BOOLEAN NOT NULL DEFAULT 0"))
+        if "ban_reason" not in columns:
+            conn.execute(text("ALTER TABLE users ADD COLUMN ban_reason VARCHAR(255) NULL"))
+        if "banned_at" not in columns:
+            conn.execute(text("ALTER TABLE users ADD COLUMN banned_at DATETIME NULL"))
+        conn.commit()
 
     db = SessionLocal()
     try:
@@ -128,6 +135,7 @@ app.include_router(follows_router, prefix="/api")
 app.include_router(notifications_router, prefix="/api")
 app.include_router(uploads_router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
+app.include_router(reports_router, prefix="/api")
 
 @app.get("/")
 def root():

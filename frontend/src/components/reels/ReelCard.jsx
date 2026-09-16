@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { HeartAnimation } from '../common/HeartAnimation';
 import ReelsCommentsBox from './ReelsCommentsBox';
+import api from '../../services/api';
 
 function ReelCard({
   reel,
@@ -852,9 +853,20 @@ function ReelCard({
             onClick={(e) => e.stopPropagation()}
           >
             <button 
-              onClick={() => {
-                alert('신고가 접수되었습니다.');
-                setShowOptionsMenu(false);
+              onClick={async () => {
+                try {
+                  const res = await api.post('/reports', {
+                    target_type: 'reel',
+                    target_id: reel.id,
+                    reason_category: 'spam',
+                    description: '부적절하거나 유해한 릴스 영상 신고',
+                  });
+                  alert(res.data.message || '신고가 정상적으로 접수되었습니다.');
+                } catch (err) {
+                  alert(err.response?.data?.detail || '신고 접수에 실패했습니다.');
+                } finally {
+                  setShowOptionsMenu(false);
+                }
               }}
               style={{
                 padding: '14px 0',

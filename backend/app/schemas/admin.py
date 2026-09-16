@@ -1,6 +1,6 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 class AdminSummaryStats(BaseModel):
     total_users: int
@@ -11,6 +11,8 @@ class AdminSummaryStats(BaseModel):
     total_reels: int
     total_comments: int
     total_likes: int
+    banned_users: int = 0
+    pending_reports: int = 0
 
 class DateCount(BaseModel):
     date: str
@@ -39,6 +41,9 @@ class AdminUserItem(BaseModel):
     is_admin: bool = False
     is_verified: bool = False
     is_private: bool = False
+    is_banned: bool = False
+    ban_reason: Optional[str] = None
+    banned_at: Optional[datetime] = None
     created_at: datetime
     posts_count: int = 0
     followers_count: int = 0
@@ -52,6 +57,9 @@ class AdminUsersResponse(BaseModel):
     page: int
     page_size: int
     total_pages: int
+
+class UserBanRequest(BaseModel):
+    reason: str = Field(..., min_length=1, max_length=255, description="정지 사유")
 
 class AdminPostAuthor(BaseModel):
     id: int
@@ -112,3 +120,82 @@ class AdminReelsResponse(BaseModel):
     page_size: int
     total_pages: int
 
+# 감사 로그 스키마
+class AdminAuditLogItem(BaseModel):
+    id: int
+    admin_id: int
+    admin_username: str
+    action: str
+    target_type: str
+    target_id: Optional[int] = None
+    target_identifier: Optional[str] = None
+    reason: Optional[str] = None
+    details: Optional[str] = None
+    ip_address: Optional[str] = None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class AdminAuditLogsResponse(BaseModel):
+    items: List[AdminAuditLogItem]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+# 신고 스키마
+class ReportCreateRequest(BaseModel):
+    target_type: str = Field(..., pattern="^(post|reel|user|comment)$", description="신고 대상 유형")
+    target_id: int = Field(..., ge=1, description="신고 대상 고유 ID")
+    reason_category: str = Field(..., description="신고 카테고리 (spam, harassment, explicit, violence, hate, copyright, other)")
+    description: Optional[str] = Field(None, max_length=1000, description="상세 신고 내용")
+
+class ReportActionRequest(BaseModel):
+    action: str = Field(..., pattern="^(content_deleted|user_banned|dismissed)$", description="조치 내용")
+    notes: Optional[str] = Field(None, max_length=500, description="관리자 처리 메모")
+    ban_reason: Optional[str] = Field(None, max_length=255, description="회원 정지 시 정지 사유")
+
+class AdminReportItem(BaseModel):
+    id: int
+    reporter_id: int
+    reporter_username: str
+    target_type: str
+    target_id: int
+    target_summary: Optional[str] = None
+    target_author_username: Optional[str] = None
+    reason_category: str
+    description: Optional[str] = None
+    status: str
+    resolution_action: Optional[str] = None
+    resolution_notes: Optional[str] = None
+    resolved_by_username: Optional[str] = None
+    created_at: datetime
+    resolved_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class AdminReportsResponse(BaseModel):
+    items: List[AdminReportItem]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+# 시스템 헬스 모니터링 스키마
+class SystemHealthResponse(BaseModel):
+    database_status: str
+    database_engine: str
+    database_size_bytes: int
+    database_size_formatted: str
+    uploads_total_size_bytes: int
+    uploads_total_size_formatted: str
+    uploads_file_count: int
+    uploads_breakdown: Dict[str, Any]
+    server_uptime_seconds: float
+    python_version: str
+    os_platform: str
+    total_users: int
+    total_posts: int
+    total_reels: int
+    banned_users: int
+    pending_reports: int

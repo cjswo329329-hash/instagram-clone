@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from './Modal';
 import { useModal } from '../../contexts/ModalContext';
+import api from '../../services/api';
 
 export const OptionsModal = () => {
   const { activeOptionsPost, closeOptions, deletePost } = useModal();
@@ -20,6 +21,22 @@ export const OptionsModal = () => {
     }
   };
 
+  const handleReport = async () => {
+    try {
+      const res = await api.post('/reports', {
+        target_type: 'post',
+        target_id: activeOptionsPost.id,
+        reason_category: 'spam',
+        description: '부적절하거나 유해한 게시물 신고',
+      });
+      alert(res.data.message || '신고가 정상적으로 접수되었습니다.');
+    } catch (err) {
+      alert(err.response?.data?.detail || '신고 접수에 실패했습니다.');
+    } finally {
+      closeOptions();
+    }
+  };
+
   return (
     <Modal
       isOpen={!!activeOptionsPost}
@@ -30,10 +47,7 @@ export const OptionsModal = () => {
     >
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <button
-          onClick={() => {
-            alert("신고가 접수되었습니다.");
-            closeOptions();
-          }}
+          onClick={handleReport}
           style={{
             padding: '14px',
             color: 'var(--ig-danger)',

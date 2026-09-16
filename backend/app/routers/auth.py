@@ -47,6 +47,13 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
     if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="아이디 또는 비밀번호가 올바르지 않습니다.")
 
+    if user.is_banned:
+        reason = user.ban_reason or "운영원칙 위반으로 이용이 제한되었습니다."
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"계정이 정지되었습니다. 사유: {reason}"
+        )
+
     access_token = create_access_token(user.id)
     refresh_token = create_refresh_token(user.id)
     return TokenResponse(
