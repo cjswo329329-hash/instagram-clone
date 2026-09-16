@@ -38,3 +38,34 @@ class PasswordChangeRequest(BaseModel):
             if old_pwd:
                 data["old_password"] = old_pwd
         return data
+
+class PasswordResetRequest(BaseModel):
+    username_or_email: Optional[str] = None
+    username: Optional[str] = None
+    email: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_identifier(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            identifier = data.get("username_or_email") or data.get("username") or data.get("email")
+            if identifier:
+                data["username_or_email"] = identifier
+        return data
+
+class PasswordResetConfirmRequest(BaseModel):
+    username_or_email: Optional[str] = None
+    username: Optional[str] = None
+    email: Optional[str] = None
+    code: str
+    new_password: str
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_identifier(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            identifier = data.get("username_or_email") or data.get("username") or data.get("email")
+            if identifier:
+                data["username_or_email"] = identifier
+        return data
+

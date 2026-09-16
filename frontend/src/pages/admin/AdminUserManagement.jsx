@@ -18,6 +18,7 @@ import {
 import { Avatar } from '../../components/common/Avatar';
 import { adminApi } from '../../services';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDebounce } from '../../hooks/useDebounce';
 
 export const AdminUserManagement = ({ onDataChange }) => {
   const { user: currentAdmin } = useAuth();
@@ -27,6 +28,7 @@ export const AdminUserManagement = ({ onDataChange }) => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [sortBy, setSortBy] = useState('created_at_desc');
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,6 +45,11 @@ export const AdminUserManagement = ({ onDataChange }) => {
 
   const [actionSuccess, setActionSuccess] = useState(null);
 
+  // 검색어나 필터가 변경되면 1페이지로 리셋
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearchTerm, statusFilter, sortBy]);
+
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -50,7 +57,7 @@ export const AdminUserManagement = ({ onDataChange }) => {
       const data = await adminApi.getUsers({
         page,
         pageSize,
-        q: searchTerm,
+        q: debouncedSearchTerm,
         sortBy,
         statusFilter,
       });
@@ -63,15 +70,45 @@ export const AdminUserManagement = ({ onDataChange }) => {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, searchTerm, sortBy, statusFilter]);
+  }, [page, pageSize, debouncedSearchTerm, sortBy, statusFilter]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    let isCancelled = false;
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await adminApi.getUsers({
+          page,
+          pageSize,
+          q: debouncedSearchTerm,
+          sortBy,
+          statusFilter,
+        });
+        if (!isCancelled) {
+          setUsers(data.items || []);
+          setTotal(data.total || 0);
+          setTotalPages(data.total_pages || 1);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          console.error('Failed to fetch users:', err);
+          setError('회원 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
+    };
+    load();
+    return () => {
+      isCancelled = true;
+    };
+  }, [page, pageSize, debouncedSearchTerm, sortBy, statusFilter]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setPage(1);
   };
 
   const handleSortChange = (e) => {
@@ -357,7 +394,7 @@ export const AdminUserManagement = ({ onDataChange }) => {
               ) : users.length === 0 ? (
                 <tr>
                   <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                    {searchTerm ? '검색 결과와 일치하는 회원이 없습니다.' : '등록된 회원이 없습니다.'}
+                    {searchTerm || statusFilter ? '조건에 일치하는 회원이 없습니다.' : '등록된 회원이 없습니다.'}
                   </td>
                 </tr>
               ) : (

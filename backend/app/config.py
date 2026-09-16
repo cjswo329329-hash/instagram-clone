@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 14
 
     DATABASE_URL: str = f"sqlite:///{_BACKEND_DIR}/instagram.db"
+    BACKEND_DIR: str = _BACKEND_DIR
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
     UPLOAD_DIR: str = os.path.join(_BACKEND_DIR, "uploads")
 

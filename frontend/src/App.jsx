@@ -7,6 +7,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { EditProfilePage } from './pages/EditProfilePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { DirectPage } from './pages/DirectPage';
 import ReelsPage from './pages/ReelsPage';
@@ -34,6 +35,14 @@ export function App() {
             <SignupPage />
           </PublicOnlyRoute>
         }
+      />
+      <Route
+        path="/accounts/password/reset"
+        element={<ResetPasswordPage />}
+      />
+      <Route
+        path="/forgot-password"
+        element={<ResetPasswordPage />}
       />
       <Route
         path="/admin/*"

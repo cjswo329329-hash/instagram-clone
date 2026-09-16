@@ -38,22 +38,27 @@ export const AdminPage = () => {
 
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(null);
 
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
+    setStatsError(null);
     try {
       const data = await adminApi.getStats();
       setStats(data);
     } catch (err) {
       console.error('Failed to load admin stats:', err);
+      setStatsError(err.response?.data?.detail || '통계 대시보드 데이터를 불러오지 못했습니다.');
     } finally {
       setStatsLoading(false);
     }
   }, []);
 
-  // 탭이 변경되거나 마운트될 때마다 최신 통계 데이터 자동 동기화
+  // 대시보드 탭이거나 최초 로드 시에만 통계 데이터 동기화
   useEffect(() => {
-    fetchStats();
+    if (currentTab === 'dashboard' || !stats) {
+      fetchStats();
+    }
   }, [fetchStats, currentTab]);
 
   const handleTabChange = (tab) => {
@@ -415,6 +420,7 @@ export const AdminPage = () => {
           <AdminStatsDashboard
             stats={stats}
             loading={statsLoading}
+            error={statsError}
             onRefresh={fetchStats}
           />
         )}

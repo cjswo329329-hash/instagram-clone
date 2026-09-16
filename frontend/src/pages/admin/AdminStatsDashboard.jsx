@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Users, 
   FileText, 
@@ -15,37 +15,77 @@ import {
   CheckCircle2,
   AlertTriangle,
   Ban,
-  Radio
+  Radio,
+  RefreshCw
 } from 'lucide-react';
 import { Avatar } from '../../components/common/Avatar';
 import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../../services';
 
-export const AdminStatsDashboard = ({ stats, loading, onRefresh }) => {
+export const AdminStatsDashboard = ({ stats, loading, error, onRefresh }) => {
   const navigate = useNavigate();
   const [health, setHealth] = useState(null);
   const [healthLoading, setHealthLoading] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
-    const loadHealth = async () => {
-      try {
-        const data = await adminApi.getSystemHealth();
-        if (isMounted) setHealth(data);
-      } catch (e) {
-        console.error('Failed to load system health:', e);
-      } finally {
-        if (isMounted) setHealthLoading(false);
-      }
-    };
-    loadHealth();
-    return () => { isMounted = false; };
-  }, [stats]);
+  const loadHealth = useCallback(async () => {
+    setHealthLoading(true);
+    try {
+      const data = await adminApi.getSystemHealth();
+      setHealth(data);
+    } catch (e) {
+      console.error('Failed to load system health:', e);
+    } finally {
+      setHealthLoading(false);
+    }
+  }, []);
 
-  if (loading || !stats) {
+  useEffect(() => {
+    loadHealth();
+  }, [loadHealth]);
+
+  if (loading) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-        대시보드 통계 데이터를 불러오는 중입니다...
+      <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+        <RefreshCw size={28} className="spin-icon" style={{ margin: '0 auto 12px auto', display: 'block', color: 'var(--ig-primary-button)' }} />
+        <div style={{ fontSize: '15px', fontWeight: 600 }}>대시보드 통계 데이터를 불러오는 중입니다...</div>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div style={{ padding: '60px 20px', textAlign: 'center', backgroundColor: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+        <AlertTriangle size={36} color="#ef4444" style={{ margin: '0 auto 12px auto', display: 'block' }} />
+        <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>
+          대시보드 데이터를 불러오지 못했습니다
+        </div>
+        <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+          {error || '서버와의 통신에 실패했습니다. 관리자 권한 및 네트워크 연결을 확인해주세요.'}
+        </div>
+        {onRefresh && (
+          <button
+            onClick={() => {
+              onRefresh();
+              loadHealth();
+            }}
+            style={{
+              padding: '8px 18px',
+              backgroundColor: 'var(--ig-primary-button)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <RefreshCw size={14} />
+            다시 시도
+          </button>
+        )}
       </div>
     );
   }

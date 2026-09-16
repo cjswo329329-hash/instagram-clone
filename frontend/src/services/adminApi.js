@@ -12,9 +12,11 @@ export const adminApi = {
     const params = { page, page_size: pageSize, sort_by: sortBy };
     if (q && q.trim()) {
       params.q = q.trim();
+      params.search = q.trim();
     }
     if (statusFilter && statusFilter.trim()) {
       params.status_filter = statusFilter.trim();
+      params.status = statusFilter.trim();
     }
     const res = await api.get('/admin/users', { params });
     return res.data;
@@ -38,11 +40,15 @@ export const adminApi = {
     return res.data;
   },
 
-  // 게시물 관리 목록 조회
-  getPosts: async ({ page = 1, pageSize = 15, q = '', sortBy = 'created_at_desc' } = {}) => {
+  // 게시물 관리 목록 조회 (검색, 미디어유형, 정렬, 페이징)
+  getPosts: async ({ page = 1, pageSize = 15, q = '', sortBy = 'created_at_desc', mediaType = '' } = {}) => {
     const params = { page, page_size: pageSize, sort_by: sortBy };
     if (q && q.trim()) {
       params.q = q.trim();
+      params.search = q.trim();
+    }
+    if (mediaType && mediaType.trim()) {
+      params.media_type = mediaType.trim();
     }
     const res = await api.get('/admin/posts', { params });
     return res.data;
@@ -54,11 +60,12 @@ export const adminApi = {
     return res.data;
   },
 
-  // 릴스 관리 목록 조회
+  // 릴스 관리 목록 조회 (검색, 정렬, 페이징)
   getReels: async ({ page = 1, pageSize = 15, q = '', sortBy = 'created_at_desc' } = {}) => {
     const params = { page, page_size: pageSize, sort_by: sortBy };
     if (q && q.trim()) {
       params.q = q.trim();
+      params.search = q.trim();
     }
     const res = await api.get('/admin/reels', { params });
     return res.data;
@@ -70,14 +77,20 @@ export const adminApi = {
     return res.data;
   },
 
-  // 신고 접수 목록 조회 (필터링, 페이징)
-  getReports: async ({ page = 1, pageSize = 15, statusFilter = '', targetType = '' } = {}) => {
+  // 신고 접수 목록 조회 (상태, 대상유형, 검색어, 페이징)
+  getReports: async ({ page = 1, pageSize = 15, statusFilter = '', targetType = '', q = '' } = {}) => {
     const params = { page, page_size: pageSize };
     if (statusFilter && statusFilter.trim()) {
       params.status_filter = statusFilter.trim();
+      params.status = statusFilter.trim();
     }
     if (targetType && targetType.trim()) {
       params.target_type = targetType.trim();
+      params.targetType = targetType.trim();
+    }
+    if (q && q.trim()) {
+      params.q = q.trim();
+      params.search = q.trim();
     }
     const res = await api.get('/admin/reports', { params });
     return res.data;
@@ -93,11 +106,16 @@ export const adminApi = {
     return res.data;
   },
 
-  // 관리자 감사 로그 조회
-  getAuditLogs: async ({ page = 1, pageSize = 20, action = '' } = {}) => {
+  // 관리자 감사 로그 조회 (액션필터, 검색어, 페이징)
+  getAuditLogs: async ({ page = 1, pageSize = 20, action = '', q = '' } = {}) => {
     const params = { page, page_size: pageSize };
     if (action && action.trim()) {
       params.action = action.trim();
+      params.action_filter = action.trim();
+    }
+    if (q && q.trim()) {
+      params.q = q.trim();
+      params.search = q.trim();
     }
     const res = await api.get('/admin/audit-logs', { params });
     return res.data;

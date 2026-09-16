@@ -10,6 +10,7 @@ from app.models.direct import Conversation, Message
 from app.models.notification import Notification
 from app.models.audit_log import AdminAuditLog
 from app.models.report import Report
+from app.models.password_reset import PasswordResetCode
 
 __all__ = [
     "User",
@@ -27,4 +28,5 @@ __all__ = [
     "Notification",
     "AdminAuditLog",
     "Report",
+    "PasswordResetCode",
 ]

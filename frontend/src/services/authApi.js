@@ -38,6 +38,24 @@ export const authApi = {
     });
     return response.data;
   },
+
+  requestPasswordReset: async (username_or_email) => {
+    const payload = typeof username_or_email === 'string'
+      ? { username_or_email }
+      : username_or_email;
+    const response = await api.post('/auth/password/reset-request', payload);
+    return response.data;
+  },
+
+  confirmPasswordReset: async ({ username_or_email, code, new_password }) => {
+    const response = await api.post('/auth/password/reset-confirm', {
+      username_or_email,
+      code,
+      new_password,
+    });
+    return response.data;
+  },
 };
 
 export default authApi;
+

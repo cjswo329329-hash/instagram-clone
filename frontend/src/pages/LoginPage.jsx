@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/common/Button';
 
@@ -9,10 +10,11 @@ export const LoginPage = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  const [username, setUsername] = useState('alex_creator');
-  const [password, setPassword] = useState('aaaa1234');
+  const [username, setUsername] = useState(() => location.state?.prefillUsername || 'alex_creator');
+  const [password, setPassword] = useState(() => location.state?.prefillUsername ? '' : 'aaaa1234');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successNotice, setSuccessNotice] = useState(() => location.state?.message || '');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,6 +69,30 @@ export const LoginPage = () => {
             Instagram
           </span>
 
+          {successNotice && (
+            <div
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                marginBottom: '16px',
+                borderRadius: '6px',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                border: '1px solid rgba(34, 197, 94, 0.3)',
+                color: '#16a34a',
+                fontSize: '12px',
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                wordBreak: 'keep-all',
+              }}
+            >
+              <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
+              <span>{successNotice}</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <input
               type="text"
@@ -118,9 +144,23 @@ export const LoginPage = () => {
             </Button>
           </form>
 
-          <a href="#forgot" style={{ fontSize: '12px', color: 'var(--ig-link)', marginTop: '20px' }}>
+          <NavLink
+            to="/accounts/password/reset"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/accounts/password/reset');
+            }}
+            style={{
+              fontSize: '12px',
+              color: 'var(--ig-link)',
+              marginTop: '20px',
+              textDecoration: 'none',
+              fontWeight: 500,
+              cursor: 'pointer',
+            }}
+          >
             비밀번호를 잊으셨나요?
-          </a>
+          </NavLink>
         </div>
 
         {/* Signup Box */}
